@@ -1,3 +1,15 @@
+# Map Party Assist 繁體中文預覽版
+
+Dalamud API 13，版本 2.5.1.3。此版本尚未完成繁中系統訊息自動辨識及遊戲內驗證。
+
+[繁中說明](README.zh-TW.md) · [原始專案](https://github.com/wrath16/MapPartyAssist)
+
+安裝庫：https://raw.githubusercontent.com/wenwen-ff14/WenwenDalamudPlugins/main/pluginmaster.json
+
+請勿與原版或開發版重複載入；沿用原版的 InternalName 與設定。
+
+---
+
 # Map Party Assist
 
 Tool for recording treasure map statistics and co-ordinating map parties.

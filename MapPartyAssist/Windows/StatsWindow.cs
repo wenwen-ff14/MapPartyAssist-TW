@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -316,7 +316,7 @@ namespace MapPartyAssist.Windows {
                 try {
                     if(ImGui.BeginMenu("Windows")) {
                         try {
-                            if(ImGui.MenuItem("Map Tracker", ImU8String.Empty, _plugin.MainWindow.IsOpen)) {
+                            if(ImGui.MenuItem("藏寶圖追蹤", ImU8String.Empty, _plugin.MainWindow.IsOpen)) {
                                 OpenMapWindow();
                             }
                         } finally {
@@ -328,7 +328,7 @@ namespace MapPartyAssist.Windows {
                             if(ImGui.MenuItem("Manage Imports")) {
                                 OpenImportsWindow();
                             }
-                            if(ImGui.MenuItem("Settings")) {
+                            if(ImGui.MenuItem("設定")) {
                                 OpenConfigWindow();
                             }
                         } finally {
@@ -388,16 +388,16 @@ namespace MapPartyAssist.Windows {
                             }
                         }
                     }
-                    using(var tab2 = ImRaii.TabItem("Loot")) {
+                    using(var tab2 = ImRaii.TabItem("戰利品")) {
                         if(tab2) {
                             using(var child = ImRaii.Child("LootResultsChild")) {
                                 _lootSummary.Draw();
                             }
                         }
                     }
-                    using(var tab3 = ImRaii.TabItem("Maps")) {
+                    using(var tab3 = ImRaii.TabItem("藏寶圖")) {
                         if(tab3) {
-                            using(var child = ImRaii.Child("Maps")) {
+                            using(var child = ImRaii.Child("藏寶圖")) {
                                 _mapList.Draw();
                             }
                         }

@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
@@ -35,7 +35,7 @@ namespace MapPartyAssist.Windows.Filter {
 
         internal override void Draw() {
             bool allSelected = AllSelected;
-            if(ImGui.Checkbox($"Select All##{GetHashCode()}", ref allSelected)) {
+            if(ImGui.Checkbox($"全選##{GetHashCode()}", ref allSelected)) {
                 _plugin!.DataQueue.QueueDataOperation(() => {
                     foreach(var duty in FilterState) {
                         FilterState[duty.Key] = allSelected;

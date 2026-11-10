@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -74,10 +74,10 @@ namespace MapPartyAssist.Windows {
                     if(child) {
                         using var table = ImRaii.Table($"AddTable", 4, ImGuiTableFlags.NoHostExtendX);
                         if(table) {
-                            ImGui.TableSetupColumn("time", ImGuiTableColumnFlags.WidthFixed, ImGuiHelpers.GlobalScale * 160);
+                            ImGui.TableSetupColumn("時間", ImGuiTableColumnFlags.WidthFixed, ImGuiHelpers.GlobalScale * 160);
                             ImGui.TableSetupColumn("duty", ImGuiTableColumnFlags.WidthStretch, ImGuiHelpers.GlobalScale * 200);
                             ImGui.TableSetupColumn("edit", ImGuiTableColumnFlags.WidthFixed, ImGuiHelpers.GlobalScale * 30);
-                            ImGui.TableSetupColumn("delete", ImGuiTableColumnFlags.WidthFixed, ImGuiHelpers.GlobalScale * 50);
+                            ImGui.TableSetupColumn("刪除", ImGuiTableColumnFlags.WidthFixed, ImGuiHelpers.GlobalScale * 50);
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
 
@@ -132,12 +132,12 @@ namespace MapPartyAssist.Windows {
                         });
                     }
                     ImGui.SameLine();
-                    if(ImGui.Button($"Cancel##{import.Id.ToString()}-CancelDelete")) {
+                    if(ImGui.Button($"取消##{import.Id.ToString()}-CancelDelete")) {
                         ImGui.CloseCurrentPopup();
                     }
                 }
             }
-            if(ImGui.Button($"Delete##{import.Id.ToString()}")) {
+            if(ImGui.Button($"刪除##{import.Id.ToString()}")) {
                 ImGui.OpenPopup($"{import.Id.ToString()}-DeletePopup");
             }
 

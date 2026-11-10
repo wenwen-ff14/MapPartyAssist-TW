@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
@@ -137,7 +137,7 @@ namespace MapPartyAssist.Windows.Summary {
                     } finally {
                         ImGui.PopFont();
                     }
-                    if(ImGui.Button("Save")) {
+                    if(ImGui.Button("儲存")) {
                         _plugin.DataQueue.QueueDataOperation(async () => {
                             await _plugin.StorageManager.UpdateMaps(_mapsPage.Where(m => m.IsEdited));
                             await _plugin.Refresh();
@@ -145,7 +145,7 @@ namespace MapPartyAssist.Windows.Summary {
                     }
 
                     ImGui.SameLine();
-                    if(ImGui.Button("Cancel")) {
+                    if(ImGui.Button("取消")) {
                         _plugin.DataQueue.QueueDataOperation(async () => {
                             _plugin.AllowEdit = false;
                             await _statsWindow.Refresh();
@@ -346,7 +346,7 @@ namespace MapPartyAssist.Windows.Summary {
                 map.IsArchived = isArchived;
             }
 
-            if(ImGui.InputText($"Owner##{map.Id}--Owner", ref owner, 50, ImGuiInputTextFlags.AutoSelectAll)) {
+            if(ImGui.InputText($"持有人##{map.Id}--Owner", ref owner, 50, ImGuiInputTextFlags.AutoSelectAll)) {
                 map.IsEdited = true;
                 map.Owner = owner;
             }

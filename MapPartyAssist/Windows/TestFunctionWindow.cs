@@ -1,4 +1,4 @@
-﻿#pragma warning disable
+#pragma warning disable
 #if DEBUG
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
@@ -386,7 +386,7 @@ namespace MapPartyAssist.Windows {
                     ImGui.EndTabItem();
                 }
 
-                if(ImGui.BeginTabItem("Settings")) {
+                if(ImGui.BeginTabItem("設定")) {
                     bool printAllMessages = _plugin.PrintAllMessages;
                     if(ImGui.Checkbox("Print all messages", ref printAllMessages)) {
                         _plugin.PrintAllMessages = printAllMessages;

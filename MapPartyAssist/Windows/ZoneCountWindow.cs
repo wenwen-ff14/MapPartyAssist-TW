@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using MapPartyAssist.Types;
@@ -14,7 +14,7 @@ namespace MapPartyAssist.Windows {
 
         internal Dictionary<string, int> Zones { get; set; } = new();
 
-        internal ZoneCountWindow(Plugin plugin, MainWindow mainWindow) : base("Map Links by Zone") {
+        internal ZoneCountWindow(Plugin plugin, MainWindow mainWindow) : base("依區域顯示地圖座標") {
             ShowCloseButton = false;
             Flags = Flags | ImGuiWindowFlags.AlwaysAutoResize;
             PositionCondition = ImGuiCond.Always;

@@ -106,7 +106,11 @@ namespace MapPartyAssist.Services {
         //builds current party list from scratch
         private async Task BuildCurrentPartyList(IPartyMember[] partyMembers) {
             Plugin.Log.Debug("Rebuilding current party list.");
-            MPAMember currentPlayerKey = new MPAMember(GetCurrentPlayer());
+            var playerKey = GetCurrentPlayer();
+            if(string.IsNullOrWhiteSpace(playerKey)) {
+                return; // Player identity is not available yet during login/logout.
+            }
+            MPAMember currentPlayerKey = new MPAMember(playerKey);
             CurrentPartyList = new();
             var allPlayers = _plugin.StorageManager.GetPlayers();
             var currentPlayer = allPlayers.Query().Where(p => p.Key == currentPlayerKey.Key).FirstOrDefault();

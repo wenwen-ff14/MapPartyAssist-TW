@@ -1,4 +1,4 @@
-﻿using LiteDB;
+using LiteDB;
 using MapPartyAssist.Types;
 using System.Collections.Generic;
 

@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
@@ -80,7 +80,7 @@ namespace MapPartyAssist.Windows {
                             }
                         }
                         ImGui.TableNextColumn();
-                        ImGui.Text("Time");
+                        ImGui.Text("時間");
                         ImGui.SameLine();
                         ImGuiHelper.HelpMarker("When to insert data. Auto-formats date\nusing your local timezone.");
 
@@ -321,7 +321,7 @@ namespace MapPartyAssist.Windows {
                 }
             }
 
-            if(ImGui.Button("Save")) {
+            if(ImGui.Button("儲存")) {
                 _plugin.DataQueue.QueueDataOperation(async () => {
                     if(_plugin.DutyManager.Duties.ContainsKey(_model.DutyId)) {
                         Plugin.Log.Information("Saving Import");
@@ -345,7 +345,7 @@ namespace MapPartyAssist.Windows {
             }
 
             ImGui.SameLine();
-            if(ImGui.Button("Cancel")) {
+            if(ImGui.Button("取消")) {
                 ClearModel();
                 IsOpen = false;
             }

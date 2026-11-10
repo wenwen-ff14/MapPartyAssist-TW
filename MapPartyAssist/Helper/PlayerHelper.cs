@@ -15,15 +15,24 @@ namespace MapPartyAssist.Helper {
         }
 
         public static bool IsAliasMatch(string fullName, string abbreviatedName) {
+            if(string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(abbreviatedName)) {
+                return false;
+            }
+            // Chinese character names have no first/last-name space.
+            if(fullName.Equals(abbreviatedName, StringComparison.OrdinalIgnoreCase) ||
+                fullName.StartsWith(abbreviatedName + " ", StringComparison.OrdinalIgnoreCase)) {
+                return true;
+            }
             var abbreviatedNameList = abbreviatedName.Trim().Split(' ');
             var fullNameList = fullName.Trim().Split(' ');
-            if(abbreviatedNameList.Length < 2) {
+            if(abbreviatedNameList.Length < 2 || fullNameList.Length < 2) {
                 //error!
                 return false;
             }
             for(int i = 0; i < 2; i++) {
                 var curFullName = fullNameList[i];
                 var curAbbreviatedName = abbreviatedNameList[i];
+                if(curFullName.Length == 0 || curAbbreviatedName.Length == 0) return false;
                 if(curAbbreviatedName.Contains('.')) {
                     if(curFullName[0] != curAbbreviatedName[0]) {
                         return false;

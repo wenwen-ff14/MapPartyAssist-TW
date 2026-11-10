@@ -1,4 +1,4 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
 using Dalamud.Game;
 using Dalamud.Game.Command;
 using Dalamud.Game.Text;
@@ -184,9 +184,12 @@ namespace MapPartyAssist {
                 DataQueue.QueueDataOperation(Initialize);
             } catch(Exception e) {
                 //remove handlers and release database if we fail to start
-                Dispose();
-                //it really shouldn't ever be null
-                Log!.Error($"Failed to initialize plugin constructor: {e.Message}");
+                Log!.Error(e, "Failed to initialize plugin constructor.");
+                try {
+                    Dispose();
+                } catch(Exception cleanupError) {
+                    Log.Error(cleanupError, "Failed to clean up after initialization failure.");
+                }
                 //re-throw to prevent constructor from initializing
                 throw;
             }

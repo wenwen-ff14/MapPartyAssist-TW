@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
@@ -30,7 +30,7 @@ namespace MapPartyAssist.Windows.Filter {
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 bool lootOnly = LootOnly;
-                if(ImGui.Checkbox("Must have loot", ref lootOnly)) {
+                if(ImGui.Checkbox("僅顯示有戰利品的紀錄", ref lootOnly)) {
                     _plugin!.DataQueue.QueueDataOperation(() => {
                         LootOnly = lootOnly;
                         Refresh();
@@ -38,7 +38,7 @@ namespace MapPartyAssist.Windows.Filter {
                 }
                 ImGui.TableNextColumn();
                 bool showDeleted = ShowDeleted;
-                if(ImGui.Checkbox("Show deleted/incomplete", ref showDeleted)) {
+                if(ImGui.Checkbox("顯示已刪除或未完成的紀錄", ref showDeleted)) {
                     _plugin!.DataQueue.QueueDataOperation(() => {
                         ShowDeleted = showDeleted;
                         Refresh();

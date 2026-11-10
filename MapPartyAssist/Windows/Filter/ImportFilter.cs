@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Threading.Tasks;
 
@@ -20,7 +20,7 @@ namespace MapPartyAssist.Windows.Filter {
 
         internal override void Draw() {
             bool includeImports = IncludeImports;
-            if(ImGui.Checkbox("Include imported duty stats", ref includeImports)) {
+            if(ImGui.Checkbox("包含匯入的寶物庫統計", ref includeImports)) {
                 _plugin!.DataQueue.QueueDataOperation(() => {
                     IncludeImports = includeImports;
                     Refresh();

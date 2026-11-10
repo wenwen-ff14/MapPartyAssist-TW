@@ -1,12 +1,12 @@
 {
   "Author": "SaMo",
-  "Name": "Map Party Assist",
-  "Punchline": "Treasure map tracker and statistics.",
-  "Description": "Tool for keeping track of treasure maps opened by party members and recording map and dungeon statistics.",
+  "Name": "Map Party Assist｜藏寶隊伍助手（繁中預覽）",
+  "Punchline": "藏寶圖追蹤與統計，繁中介面預覽版。",
+  "Description": "繁體中文介面預覽版，Dalamud API 13。主要追蹤介面、設定與部分篩選器已翻譯。繁中系統訊息自動辨識尚未完成，部分統計畫面仍為英文；尚未完成遊戲內載入與功能驗證。輸入 /mparty 開啟。",
   "InternalName": "MapPartyAssist",
-  "RepoUrl": "https://github.com/wrath16/MapPartyAssist",
+  "RepoUrl": "https://github.com/wenwen-ff14/MapPartyAssist-TW",
   "ApplicableVersion": "any",
-  "Changelog": "-Bug fixes.",
+  "Changelog": "2.5.1.3：修正中文角色名稱造成隊伍成員解析陣列越界；處理登入時角色資料尚未就緒，並支援中文角色別名比對。",
   "Tags": [
     "treasure maps",
     "maps",

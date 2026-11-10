@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
@@ -21,11 +21,11 @@ namespace MapPartyAssist.Windows.Filter {
 
     public class TimeFilter : DataFilter {
 
-        public override string Name => "Time";
+        public override string Name => "時間";
         public override string HelpMessage => "'Current' limits to maps and linked duties on the map tracker.\nCustom time ranges input auto-formats using your local timezone.";
 
         public StatRange StatRange { get; set; } = StatRange.All;
-        public static string[] Range = { "Current", "Past 24 hours", "Past 7 days", "This month", "Last month", "This year", "Last year", "Since last clear", "All-time", "Custom" };
+        public static string[] Range = { "目前", "Past 24 hours", "Past 7 days", "This month", "Last month", "This year", "Last year", "自上次通關起", "All-time", "Custom" };
 
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
@@ -34,10 +34,10 @@ namespace MapPartyAssist.Windows.Filter {
 
         //public static string RangeToString(StatRange range) {
         //    return range switch {
-        //        StatRange.Current => "Current",
+        //        StatRange.Current => "目前",
         //        StatRange.PastDay => "Last 24 hours",
         //        StatRange.PastWeek => "Last 7 days",
-        //        StatRange.SinceLastClear => "Since last clear",
+        //        StatRange.SinceLastClear => "自上次通關起",
         //        StatRange.All => "All-Time",
         //        StatRange.AllLegacy => "All-Time with Imports",
         //        _ => "???",
@@ -71,7 +71,7 @@ namespace MapPartyAssist.Windows.Filter {
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
                     ImGui.AlignTextToFramePadding();
-                    ImGui.Text("Start:");
+                    ImGui.Text("開始：");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(ImGui.GetColumnWidth());
                     var startTime = StartTime.ToString();
@@ -87,7 +87,7 @@ namespace MapPartyAssist.Windows.Filter {
                         }
                     }
                     ImGui.TableNextColumn();
-                    ImGui.Text("End:");
+                    ImGui.Text("結束：");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
                     var endTime = EndTime.ToString();

@@ -1,4 +1,4 @@
-﻿using Dalamud.Game;
+using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -373,6 +373,11 @@ namespace MapPartyAssist.Services {
 
             //setup regexes
             foreach(var duty in Duties) {
+                // Regional clients may not ship the international language sheets.
+                // Automatic parsing is already disabled for unsupported languages.
+                if(!_plugin.IsLanguageSupported()) {
+                    break;
+                }
                 duty.Value.FailureCheckpoint = new Checkpoint("Failure", GetFailureRegex(duty.Value.DutyId));
 
                 if(duty.Value.Structure == DutyStructure.Roulette) {

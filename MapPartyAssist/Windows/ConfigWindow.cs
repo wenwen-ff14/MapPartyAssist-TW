@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -11,7 +11,7 @@ namespace MapPartyAssist.Windows {
 
         private Plugin _plugin;
 
-        internal ConfigWindow(Plugin plugin) : base("Map Party Assist Settings") {
+        internal ConfigWindow(Plugin plugin) : base("藏寶隊伍助手設定") {
             SizeConstraints = new WindowSizeConstraints {
                 MinimumSize = new Vector2(300, 50),
                 MaximumSize = new Vector2(2000, 2000)
@@ -23,17 +23,17 @@ namespace MapPartyAssist.Windows {
         public override void Draw() {
             using(var tabBar = ImRaii.TabBar("SettingsTabBar", ImGuiTabBarFlags.None)) {
                 if(tabBar) {
-                    using(var tab1 = ImRaii.TabItem("General Stats")) {
+                    using(var tab1 = ImRaii.TabItem("一般統計")) {
                         if(tab1) {
                             DrawStatsSettings();
                         }
                     }
-                    using(var tab2 = ImRaii.TabItem("Map Tracker")) {
+                    using(var tab2 = ImRaii.TabItem("藏寶圖追蹤")) {
                         if(tab2) {
                             DrawMapSettings();
                         }
                     }
-                    using(var tab3 = ImRaii.TabItem("Duty Progress")) {
+                    using(var tab3 = ImRaii.TabItem("寶物庫進度")) {
                         if(tab3) {
                             DrawDutySettings();
                         }
@@ -44,31 +44,31 @@ namespace MapPartyAssist.Windows {
 
         private void DrawMapSettings() {
             bool requireDoubleTap = _plugin.Configuration.RequireDoubleClickOnClearAll;
-            if(ImGui.Checkbox("Require double click on 'Clear All'", ref requireDoubleTap)) {
+            if(ImGui.Checkbox("「全部清除」需要按兩下", ref requireDoubleTap)) {
                 _plugin.Configuration.RequireDoubleClickOnClearAll = requireDoubleTap;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             bool hideZoneTable = _plugin.Configuration.HideZoneTable;
-            if(ImGui.Checkbox("Hide 'Map Links by Zone'", ref hideZoneTable)) {
+            if(ImGui.Checkbox("隱藏「依區域顯示地圖座標」", ref hideZoneTable)) {
                 _plugin.Configuration.HideZoneTable = hideZoneTable;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             bool hideZoneTableEmpty = _plugin.Configuration.HideZoneTableWhenEmpty;
-            if(ImGui.Checkbox("Hide 'Map Links by Zone' only when empty", ref hideZoneTableEmpty)) {
+            if(ImGui.Checkbox("僅在沒有資料時隱藏區域地圖座標", ref hideZoneTableEmpty)) {
                 _plugin.Configuration.HideZoneTableWhenEmpty = hideZoneTableEmpty;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             bool undockZoneWindow = _plugin.Configuration.UndockZoneWindow;
-            if(ImGui.Checkbox("Undock 'Map Links by Zone' window", ref undockZoneWindow)) {
+            if(ImGui.Checkbox("將區域地圖座標顯示為獨立視窗", ref undockZoneWindow)) {
                 _plugin.Configuration.UndockZoneWindow = undockZoneWindow;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             bool noOverwriteMapLink = _plugin.Configuration.NoOverwriteMapLink;
-            if(ImGui.Checkbox("Don't overwrite map links", ref noOverwriteMapLink)) {
+            if(ImGui.Checkbox("不要覆寫地圖座標", ref noOverwriteMapLink)) {
                 _plugin.DataQueue.QueueDataOperation(() => {
                     _plugin.Configuration.NoOverwriteMapLink = noOverwriteMapLink;
                     _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
@@ -78,19 +78,19 @@ namespace MapPartyAssist.Windows {
             ImGuiHelper.HelpMarker("Will only clear map link on new treasure map added to player, manual removal, or manual re-assignment of latest map only.");
 
             bool highlightCurrentZoneLinks = _plugin.Configuration.HighlightLinksInCurrentZone;
-            if(ImGui.Checkbox("Highlight map links in current zone (yellow)", ref highlightCurrentZoneLinks)) {
+            if(ImGui.Checkbox("以黃色標示目前區域的地圖座標", ref highlightCurrentZoneLinks)) {
                 _plugin.Configuration.HighlightLinksInCurrentZone = highlightCurrentZoneLinks;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             bool highlightClosestLink = _plugin.Configuration.HighlightClosestLink;
-            if(ImGui.Checkbox("Highlight closest map link (orange)", ref highlightClosestLink)) {
+            if(ImGui.Checkbox("以橘色標示最近的地圖座標", ref highlightClosestLink)) {
                 _plugin.Configuration.HighlightClosestLink = highlightClosestLink;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             string mapLinkMessage = _plugin.Configuration.MapLinkChat ?? "<flag>";
-            ImGui.Text("Map link chat message format");
+            ImGui.Text("地圖座標聊天訊息格式");
             ImGuiHelper.HelpMarker("Message to display in party chat when using the announce map link function. Recommend enabling 'Don't overwrite map links' with this feature. Hit enter to save after editing.\n\nCustom shortcuts:\nPlayer name: <name>\nFull name with home world: <fullname>\nFirst name: <firstname>");
             if(ImGui.InputText("###MapLinkChatPrefix", ref mapLinkMessage, 50, ImGuiInputTextFlags.EnterReturnsTrue)) {
                 _plugin.Configuration.MapLinkChat = mapLinkMessage;
@@ -100,36 +100,36 @@ namespace MapPartyAssist.Windows {
 
         private void DrawDutySettings() {
             bool showTooltips = _plugin.Configuration.ShowStatsWindowTooltips;
-            if(ImGui.Checkbox("Show explanatory tooltips", ref showTooltips)) {
+            if(ImGui.Checkbox("顯示說明提示", ref showTooltips)) {
                 _plugin.Configuration.ShowStatsWindowTooltips = showTooltips;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             int progressCountToInt = (int)_plugin.Configuration.ProgressTableCount;
-            string[] progressCountOptions = { "By all occurences", "By last checkpoint only" };
+            string[] progressCountOptions = { "計算所有次數", "僅計算最後檢查點" };
             ImGui.SetNextItemWidth(200f * ImGuiHelpers.GlobalScale);
-            if(ImGui.Combo($"Tally checkpoint totals##CountCombo", ref progressCountToInt, progressCountOptions, 2)) {
+            if(ImGui.Combo($"檢查點累計方式##CountCombo", ref progressCountToInt, progressCountOptions, 2)) {
                 _plugin.Configuration.ProgressTableCount = (ProgressTableCount)progressCountToInt;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             int progressRateToInt = (int)_plugin.Configuration.ProgressTableRate;
-            string[] progressRateOptions = { "By total runs", "By previous stage" };
+            string[] progressRateOptions = { "依總挑戰次數", "依上一階段次數" };
             ImGui.SetNextItemWidth(200f * ImGuiHelpers.GlobalScale);
-            if(ImGui.Combo($"Divide progress rates##RateCombo", ref progressRateToInt, progressRateOptions, 2)) {
+            if(ImGui.Combo($"進度比率分母##RateCombo", ref progressRateToInt, progressRateOptions, 2)) {
                 _plugin.Configuration.ProgressTableRate = (ProgressTableRate)progressRateToInt;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
             int clearSequenceToInt = (int)_plugin.Configuration.ClearSequenceCount;
-            string[] clearSequenceOptions = { "By total runs", "Since last clear" };
+            string[] clearSequenceOptions = { "依總挑戰次數", "自上次通關起" };
             ImGui.SetNextItemWidth(200f * ImGuiHelpers.GlobalScale);
-            if(ImGui.Combo($"Tally clear sequence##ClearSequenceCombo", ref clearSequenceToInt, clearSequenceOptions, 2)) {
+            if(ImGui.Combo($"通關間隔計算方式##ClearSequenceCombo", ref clearSequenceToInt, clearSequenceOptions, 2)) {
                 _plugin.Configuration.ClearSequenceCount = (ClearSequenceCount)clearSequenceToInt;
                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
             }
 
-            ImGui.Text("All duties:");
+            ImGui.Text("所有寶物庫：");
 
             bool allDeaths = true;
             bool allSequences = true;
@@ -144,28 +144,28 @@ namespace MapPartyAssist.Windows {
                 if(table) {
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
-                    if(ImGui.Checkbox("Display clear sequence", ref allSequences)) {
+                    if(ImGui.Checkbox("顯示通關間隔", ref allSequences)) {
                         foreach(var dutyConfig in _plugin.Configuration.DutyConfigurations) {
                             dutyConfig.Value.DisplayClearSequence = allSequences;
                         }
                         _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                     }
                     ImGui.TableNextColumn();
-                    if(ImGui.Checkbox("Display wipes", ref allDeaths)) {
+                    if(ImGui.Checkbox("顯示全滅次數", ref allDeaths)) {
                         foreach(var dutyConfig in _plugin.Configuration.DutyConfigurations) {
                             dutyConfig.Value.DisplayDeaths = allDeaths;
                         }
                         _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                     }
                     ImGui.TableNextColumn();
-                    if(ImGui.Checkbox("Omit no checkpoints", ref allZeroOmit)) {
+                    if(ImGui.Checkbox("略過未到達檢查點的紀錄", ref allZeroOmit)) {
                         foreach(var dutyConfig in _plugin.Configuration.DutyConfigurations) {
                             dutyConfig.Value.OmitZeroCheckpoints = allZeroOmit;
                         }
                         _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                     }
                     ImGui.SameLine();
-                    ImGuiHelper.HelpMarker("Runs where no checkpoints were reached will be omitted from stats.");
+                    ImGuiHelper.HelpMarker("統計將略過未到達任何檢查點的挑戰。");
                 }
             }
 
@@ -178,19 +178,19 @@ namespace MapPartyAssist.Windows {
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
                             bool displayClearSequence = dutyConfig.Value.DisplayClearSequence;
-                            if(ImGui.Checkbox($"Display clear sequence##{dutyConfig.Key}--ClearSequence", ref displayClearSequence)) {
+                            if(ImGui.Checkbox($"顯示通關間隔##{dutyConfig.Key}--ClearSequence", ref displayClearSequence)) {
                                 dutyConfig.Value.DisplayClearSequence = displayClearSequence;
                                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                             }
                             ImGui.TableNextColumn();
                             bool showDeaths = dutyConfig.Value.DisplayDeaths;
-                            if(ImGui.Checkbox($"Display wipes##{dutyConfig.Key}--Wipes", ref showDeaths)) {
+                            if(ImGui.Checkbox($"顯示全滅次數##{dutyConfig.Key}--Wipes", ref showDeaths)) {
                                 dutyConfig.Value.DisplayDeaths = showDeaths;
                                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                             }
                             ImGui.TableNextColumn();
                             bool omitZeroCheckpoints = dutyConfig.Value.OmitZeroCheckpoints;
-                            if(ImGui.Checkbox($"Omit no checkpoints##{dutyConfig.Key}--NoCheckpoints", ref omitZeroCheckpoints)) {
+                            if(ImGui.Checkbox($"略過未到達檢查點的紀錄##{dutyConfig.Key}--NoCheckpoints", ref omitZeroCheckpoints)) {
                                 dutyConfig.Value.OmitZeroCheckpoints = omitZeroCheckpoints;
                                 _plugin.DataQueue.QueueDataOperation(_plugin.Configuration.Save);
                             }
@@ -202,7 +202,7 @@ namespace MapPartyAssist.Windows {
 
         private void DrawStatsSettings() {
             bool separateStatsByPlayer = _plugin.Configuration.CurrentCharacterStatsOnly;
-            if(ImGui.Checkbox("Only include stats for current character", ref separateStatsByPlayer)) {
+            if(ImGui.Checkbox("僅統計目前角色的紀錄", ref separateStatsByPlayer)) {
                 _plugin.DataQueue.QueueDataOperation(async () => {
                     _plugin.Configuration.CurrentCharacterStatsOnly = separateStatsByPlayer;
                     await _plugin.Refresh();
@@ -212,7 +212,7 @@ namespace MapPartyAssist.Windows {
             ImGuiHelper.HelpMarker("Only counts maps/duties in stats where the currently logged-in character was present, name-changes not-withstanding.");
 
             bool enablePriceCheck = _plugin.Configuration.EnablePriceCheck;
-            if(ImGui.Checkbox("Enable market board pricing", ref enablePriceCheck)) {
+            if(ImGui.Checkbox("啟用市場價格查詢", ref enablePriceCheck)) {
                 _plugin.DataQueue.QueueDataOperation(async () => {
                     _plugin.Configuration.EnablePriceCheck = enablePriceCheck;
                     if(enablePriceCheck) {
@@ -224,7 +224,7 @@ namespace MapPartyAssist.Windows {
                 });
             }
             ImGui.SameLine();
-            ImGuiHelper.HelpMarker("Uses Universalis API.");
+            ImGuiHelper.HelpMarker("使用 Universalis API。");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Threading.Tasks;
 
@@ -18,7 +18,7 @@ namespace MapPartyAssist.Windows.Filter {
 
         internal override void Draw() {
             bool onlyClears = OnlyClears;
-            if(ImGui.Checkbox("Full clears only", ref onlyClears)) {
+            if(ImGui.Checkbox("僅限完整通關", ref onlyClears)) {
                 _plugin!.DataQueue.QueueDataOperation(() => {
                     OnlyClears = onlyClears;
                     Refresh();

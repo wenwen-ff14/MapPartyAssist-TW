@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Threading.Tasks;
 
@@ -41,7 +41,7 @@ namespace MapPartyAssist.Windows.Filter {
                 }
             }
 
-            if(ImGui.Checkbox("Solo only", ref onlySolo)) {
+            if(ImGui.Checkbox("僅限單人", ref onlySolo)) {
                 _plugin!.DataQueue.QueueDataOperation(() => {
                     OnlySolo = onlySolo;
                     Refresh();

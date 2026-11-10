@@ -29,9 +29,12 @@ namespace MapPartyAssist.Types {
         }
 
         public MPAMember(string key, bool isSelf = false) {
-            var split = key.Split(" ");
-            Name = $"{split[0]} {split[1]}";
-            HomeWorld = split[2];
+            var separator = key.LastIndexOf(' ');
+            if(separator <= 0 || separator == key.Length - 1) {
+                throw new ArgumentException("Player key must contain a name and home world.", nameof(key));
+            }
+            Name = key[..separator];
+            HomeWorld = key[(separator + 1)..];
             IsSelf = isSelf;
             LastJoined = DateTime.UtcNow;
             Maps = new();

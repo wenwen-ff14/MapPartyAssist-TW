@@ -42,7 +42,7 @@ internal class MainWindow : Window {
 
     private SemaphoreSlim _refreshLock = new SemaphoreSlim(1, 1);
 
-    internal MainWindow(Plugin plugin) : base("Map Party Assist") {
+    internal MainWindow(Plugin plugin) : base("藏寶隊伍助手") {
         ForceMainWindow = true;
         PositionCondition = ImGuiCond.Once;
         SizeConstraints = new WindowSizeConstraints {
@@ -142,10 +142,10 @@ internal class MainWindow : Window {
         _statusMessageWindow.IsOpen = !_plugin.MapManager.StatusMessage.IsNullOrEmpty();
 
         if(!_plugin.IsLanguageSupported()) {
-            ImGui.TextColored(ImGuiColors.DalamudRed, $"Unsupported language, automatic tracking unavailable.");
+            ImGui.TextColored(ImGuiColors.DalamudRed, $"此遊戲語系尚未支援自動追蹤，請使用手動記錄。");
         }
 
-        if(ImGui.Button("Clear All")) {
+        if(ImGui.Button("全部清除")) {
             if(!_plugin.Configuration.RequireDoubleClickOnClearAll) {
                 _plugin.DataQueue.QueueDataOperation(async () => {
                     await _plugin.MapManager.ClearAllMaps();
@@ -165,20 +165,20 @@ internal class MainWindow : Window {
             }
             if(_plugin.Configuration.RequireDoubleClickOnClearAll) {
                 ImGui.BeginTooltip();
-                ImGui.Text($"Double click to clear all.");
+                ImGui.Text($"按兩下以全部清除。");
                 ImGui.EndTooltip();
             }
         }
 
         ImGui.SameLine();
-        ImGui.Text($"Total Maps: {_currentMapCount}");
+        ImGui.Text($"藏寶圖總數：{_currentMapCount}");
         //if(ImGui.IsItemHovered()) {
         //    ImGui.BeginTooltip();
         //    ImGui.Text($"Including recent party members: {_currentMapCount + _recentMapCount}");
         //    ImGui.EndTooltip();
         //}
         ImGui.SameLine();
-        ImGui.Text($"Total Portals: {_currentPortalCount}");
+        ImGui.Text($"傳送門總數：{_currentPortalCount}");
         //if(ImGui.IsItemHovered()) {
         //    ImGui.BeginTooltip();
         //    ImGui.Text($"Including recent party members: {_currentPortalCount + _recentPortalCount}");
@@ -187,11 +187,11 @@ internal class MainWindow : Window {
         //ImGui.Text($"{ImGuiHelpers.GlobalScale.ToString()}");
 
         ImGuiHelper.HelpMarker(() => {
-            ImGui.TextColored(ImGuiColors.ParsedGreen, "Automatically added.");
-            ImGui.TextColored(ImGuiColors.DalamudWhite, "Manually added.");
-            ImGui.TextColored(ImGuiColors.ParsedBlue, "Manually re-assigned.");
-            ImGui.TextColored(ImGuiColors.ParsedOrange, "Possibly wrong owner.");
-            ImGui.TextColored(ImGuiColors.DalamudRed, "Unknown owner.");
+            ImGui.TextColored(ImGuiColors.ParsedGreen, "自動新增。");
+            ImGui.TextColored(ImGuiColors.DalamudWhite, "手動新增。");
+            ImGui.TextColored(ImGuiColors.ParsedBlue, "已手動重新指定。");
+            ImGui.TextColored(ImGuiColors.ParsedOrange, "持有人可能有誤。");
+            ImGui.TextColored(ImGuiColors.DalamudRed, "持有人不明。");
         });
 
         //if(!_refreshLock.Wait(0)) {
@@ -199,13 +199,13 @@ internal class MainWindow : Window {
         //}
         //try {
         //    if(_currentPlayerMaps.Count <= 0) {
-        //        ImGui.Text("No party members currently.");
+        //        ImGui.Text("目前沒有隊伍成員。");
         //    } else {
         //        MapTable(_currentPlayerMaps);
         //    }
 
         //    if(_recentPlayerMaps.Count > 0) {
-        //        ImGui.Text("Recent party members:");
+        //        ImGui.Text("最近的隊伍成員：");
         //        MapTable(_recentPlayerMaps);
         //    }
 
@@ -220,13 +220,13 @@ internal class MainWindow : Window {
         bool refreshLockAcquired = _refreshLock.Wait(0);
         try {
             if(_currentPlayerMaps.Count <= 0) {
-                ImGui.Text("No party members currently.");
+                ImGui.Text("目前沒有隊伍成員。");
             } else {
                 MapTable(_currentPlayerMaps);
             }
 
             if(_recentPlayerMaps.Count > 0) {
-                ImGui.Text("Recent party members:");
+                ImGui.Text("最近的隊伍成員：");
                 MapTable(_recentPlayerMaps);
             }
 
@@ -276,7 +276,7 @@ internal class MainWindow : Window {
 
                 using(var popup = ImRaii.ContextPopupItem($"##{playerMaps.Key.GetHashCode()}--NameContextMenu", ImGuiPopupFlags.MouseButtonRight)) {
                     if(popup) {
-                        if(ImGui.MenuItem($"Announce map link to party chat##{playerMaps.Key.GetHashCode()}--NameLinkInChat")) {
+                        if(ImGui.MenuItem($"將地圖座標傳送至隊伍頻道##{playerMaps.Key.GetHashCode()}--NameLinkInChat")) {
                             var mapLink = playerMaps.Key.MapLink;
                             if(mapLink != null) {
                                 try {
@@ -297,12 +297,12 @@ internal class MainWindow : Window {
                                     Plugin.Log.Error(ex, "Unable to send chat message");
                                 }
                             }
-                        } else if(ImGui.MenuItem($"Add map manually##{playerMaps.Key.GetHashCode()}--NameAddMap")) {
+                        } else if(ImGui.MenuItem($"手動新增藏寶圖##{playerMaps.Key.GetHashCode()}--NameAddMap")) {
                             _plugin.DataQueue.QueueDataOperation(async () => {
                                 await _plugin.MapManager.AddMap(playerMaps.Key, null, "Manually-added map", true);
                                 await _plugin.Refresh();
                             });
-                        } else if(ImGui.MenuItem($"Restore last map link##{playerMaps.Key.GetHashCode()}--RestoreMapLink")) {
+                        } else if(ImGui.MenuItem($"還原上一個地圖座標##{playerMaps.Key.GetHashCode()}--RestoreMapLink")) {
                             _plugin.DataQueue.QueueDataOperation(async () => {
                                 //I should make this value-type
                                 var prevLink = playerMaps.Key.PreviousMapLink;
@@ -313,7 +313,7 @@ internal class MainWindow : Window {
                                     await _plugin.Refresh();
                                 }
                             });
-                        } else if(ImGui.MenuItem($"Clear map link##{playerMaps.Key.GetHashCode()}--ClearMapLink")) {
+                        } else if(ImGui.MenuItem($"清除地圖座標##{playerMaps.Key.GetHashCode()}--ClearMapLink")) {
                             _plugin.DataQueue.QueueDataOperation(async () => {
                                 playerMaps.Key.SetMapLink(null);
                                 await _plugin.StorageManager.UpdatePlayer(playerMaps.Key);
@@ -362,14 +362,14 @@ internal class MainWindow : Window {
                     ImGui.TextColored(color, $" +{playerMaps.Value.Count() - MaxMaps}");
                     using(var popup = ImRaii.ContextPopupItem($"##{playerMaps.Key.GetHashCode()}--ExtraMapsContextMenu", ImGuiPopupFlags.MouseButtonRight)) {
                         if(popup) {
-                            if(ImGui.MenuItem($"Archive Last##{playerMaps.Key.GetHashCode()}--ExtraMapsArchive")) {
+                            if(ImGui.MenuItem($"封存最後一筆##{playerMaps.Key.GetHashCode()}--ExtraMapsArchive")) {
                                 _plugin.DataQueue.QueueDataOperation(async () => {
                                     await _plugin.MapManager.ArchiveMaps([lastMap]);
                                     await _plugin.Refresh();
                                 });
 
                             }
-                            if(ImGui.MenuItem($"Delete Last##{playerMaps.Key.GetHashCode()}--ExtraMapsDelete")) {
+                            if(ImGui.MenuItem($"刪除最後一筆##{playerMaps.Key.GetHashCode()}--ExtraMapsDelete")) {
                                 _plugin.DataQueue.QueueDataOperation(async () => {
                                     await _plugin.MapManager.DeleteMaps([lastMap]);
                                     await _plugin.Refresh();
@@ -393,10 +393,10 @@ internal class MainWindow : Window {
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
             if(_lastMapPlayer == null) {
-                ImGui.TextColored(ImGuiColors.DalamudYellow, "UNKNOWN");
+                ImGui.TextColored(ImGuiColors.DalamudYellow, "不明");
                 ImGuiHelper.WrappedTooltip("Used most recent map.");
             } else {
-                ImGui.TextUnformatted($"UNKNOWN");
+                ImGui.TextUnformatted($"不明");
             }
             for(int i = 0; i < _unknownOwnerMaps.Count && i < MaxMaps; i++) {
                 var currentMap = _unknownOwnerMaps.ElementAt(i);
@@ -413,13 +413,13 @@ internal class MainWindow : Window {
                 ImGui.TextColored(ImGuiColors.DalamudRed, $" +{_unknownOwnerMaps.Count - MaxMaps}");
                 using(var popup = ImRaii.ContextPopupItem($"##UnknownExtraMapsContextMenu", ImGuiPopupFlags.MouseButtonRight)) {
                     if(popup) {
-                        if(ImGui.MenuItem($"Archive Last##UnknownExtraMapsArchive")) {
+                        if(ImGui.MenuItem($"封存最後一筆##UnknownExtraMapsArchive")) {
                             _plugin.DataQueue.QueueDataOperation(async () => {
                                 await _plugin.MapManager.ArchiveMaps([_unknownOwnerMaps.Last()]);
                                 await _plugin.Refresh();
                             });
                         }
-                        if(ImGui.MenuItem($"Delete Last##UnknownExtraMapsDelete")) {
+                        if(ImGui.MenuItem($"刪除最後一筆##UnknownExtraMapsDelete")) {
                             _plugin.DataQueue.QueueDataOperation(async () => {
                                 await _plugin.MapManager.DeleteMaps([_unknownOwnerMaps.Last()]);
                                 await _plugin.Refresh();
@@ -446,13 +446,13 @@ internal class MainWindow : Window {
 
         using(var popup = ImRaii.ContextPopupItem($"##{map.GetHashCode()}--MapContextMenu", ImGuiPopupFlags.MouseButtonRight)) {
             if(popup) {
-                if(ImGui.MenuItem($"Archive##{map.GetHashCode()}--ArchiveMap")) {
+                if(ImGui.MenuItem($"封存##{map.GetHashCode()}--ArchiveMap")) {
                     _plugin.DataQueue.QueueDataOperation(async () => {
                         await _plugin.MapManager.ArchiveMaps([map]);
                         await _plugin.Refresh();
                     });
                 }
-                if(ImGui.MenuItem($"Delete##{map.GetHashCode()}--DeleteMap")) {
+                if(ImGui.MenuItem($"刪除##{map.GetHashCode()}--DeleteMap")) {
                     _plugin.DataQueue.QueueDataOperation(async () => {
                         await _plugin.MapManager.DeleteMaps([map]);
                         await _plugin.Refresh();
@@ -497,7 +497,7 @@ internal class MainWindow : Window {
         if(drag) {
             byte[] data = map.Id.ToByteArray();
             ImGui.SetDragDropPayload("map", data, ImGuiCond.Once);
-            ImGui.Text("Drag to name to re-assign...");
+            ImGui.Text("拖曳至角色名稱以重新指定…");
         }
         return drag.Success;
     }
