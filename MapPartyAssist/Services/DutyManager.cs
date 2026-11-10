@@ -1,4 +1,5 @@
 using Dalamud.Game;
+using MapPartyAssist.Helper;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -556,6 +557,14 @@ namespace MapPartyAssist.Services {
                 if(IsDutyInProgress()) {
                     //clear current duty if it was completed successfully or clear as a fallback. attempt to pickup otherwise on disconnect
                     if(CurrentDutyResults!.IsComplete || dutyId != CurrentDutyResults.DutyId) {
+                        if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese &&
+                            dutyId != CurrentDutyResults.DutyId) {
+                            // Ending the run does not imply a full clear. Retain only
+                            // checkpoints actually observed before leaving the duty.
+                            CurrentDutyResults.IsComplete = true;
+                            if(CurrentDutyResults.CompletionTime == default)
+                                CurrentDutyResults.CompletionTime = DateTime.UtcNow;
+                        }
                         await EndCurrentDuty();
                     }
                 } else if(duty != null) {
@@ -574,7 +583,7 @@ namespace MapPartyAssist.Services {
         private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled) {
 
             //refuse to process if not a supported language
-            if(!_plugin.IsLanguageSupported()) {
+            if(!_plugin.IsLanguageSupported() && _plugin.ClientState.ClientLanguage != ClientLanguage.TraditionalChinese) {
                 return;
             }
 
@@ -609,6 +618,9 @@ namespace MapPartyAssist.Services {
 
         //return true if change occured
         internal bool ProcessChatMessage(DutyResults results, Message message) {
+            if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese) {
+                return ProcessTraditionalChineseProgress(results, message);
+            }
             bool isChange = false;
             var duty = Duties[results.DutyId];
 
@@ -718,11 +730,26 @@ namespace MapPartyAssist.Services {
         }
 
         //return true if updates made
+        private bool ProcessTraditionalChineseProgress(DutyResults results, Message message) {
+            if(results.IsComplete || (message.Channel != 2105 && message.Channel != 2233)) return false;
+            if(TraditionalChineseDutyMessages.IsEnd(message.Text)) {
+                results.IsComplete = true;
+                results.CompletionTime = message.Time;
+                return true;
+            }
+            var duty = Duties[results.DutyId];
+            if(duty.Structure != DutyStructure.Doors) return false;
+            return ProcessCheckpointsDoors(results, message);
+        }
+
         private bool ProcessCheckpointsDoors(DutyResults results, Message message) {
             var duty = Duties[results.DutyId];
             if(results.CheckpointResults.Count < duty.Checkpoints!.Count) {
                 var nextCheckpoint = duty.Checkpoints![results.CheckpointResults.Count];
-                if((message.Channel == 2233 || message.Channel == 2105) && nextCheckpoint.LocalizedRegex![_plugin.ClientState.ClientLanguage].IsMatch(message.Text)) {
+                bool matches = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese
+                    ? TraditionalChineseDutyMessages.IsNextDoorCheckpoint(message.Text, results.CheckpointResults.Count)
+                    : nextCheckpoint.LocalizedRegex![_plugin.ClientState.ClientLanguage].IsMatch(message.Text);
+                if((message.Channel == 2233 || message.Channel == 2105) && matches) {
                     Plugin.Log.Information($"Adding new checkpoint: {nextCheckpoint.Name}");
                     results.CheckpointResults.Add(new() {
                         Checkpoint = nextCheckpoint,
