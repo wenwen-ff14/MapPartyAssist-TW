@@ -141,7 +141,7 @@ internal class MainWindow : Window {
         //set status message window visibility
         _statusMessageWindow.IsOpen = !_plugin.MapManager.StatusMessage.IsNullOrEmpty();
 
-        if(!_plugin.IsLanguageSupported()) {
+        if(!_plugin.IsLanguageSupported() && _plugin.ClientState.ClientLanguage != Dalamud.Game.ClientLanguage.TraditionalChinese) {
             ImGui.TextColored(ImGuiColors.DalamudRed, $"此遊戲語系尚未支援自動追蹤，請使用手動記錄。");
         }
 

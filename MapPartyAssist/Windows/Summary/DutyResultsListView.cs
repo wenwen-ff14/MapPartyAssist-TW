@@ -242,7 +242,7 @@ namespace MapPartyAssist.Windows.Summary {
                         ImGui.TableSetupColumn("propVal", ImGuiTableColumnFlags.WidthStretch);
 
                         ImGui.TableNextColumn();
-                        ImGui.TextColored(ImGuiColors.DalamudGrey, "Completed: ");
+                        ImGui.TextColored(ImGuiColors.DalamudGrey, "場次已結束（非通關）: ");
                         ImGui.TableNextColumn();
                         ImGui.Text($"{(dutyResults.IsComplete ? "Yes" : "No")}");
 

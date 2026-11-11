@@ -731,6 +731,30 @@ namespace MapPartyAssist.Services {
 
         //return true if updates made
         private bool ProcessTraditionalChineseProgress(DutyResults results, Message message) {
+            if(!results.IsComplete) {
+                var gil = TraditionalChineseDutyMessages.Gil.Match(message.Text);
+                if(message.Channel == 62 && gil.Success) {
+                    var quantity = TraditionalChineseDutyMessages.Quantity(gil);
+                    results.TotalGil += quantity;
+                    AddLootResults(results, 1, false, quantity, _plugin.GameStateManager.GetCurrentPlayer());
+                    return true;
+                }
+                var item = TraditionalChineseDutyMessages.ObtainedItem.Match(message.Text);
+                var loot = TraditionalChineseDutyMessages.LootList.Match(message.Text);
+                if(message.ItemId is uint itemId) {
+                    if((message.Channel == 2110 || message.Channel == 4158 || message.Channel == 8254) && item.Success) {
+                        var recipient = message.PlayerKey ?? (item.Groups["player"].Value.Length == 0
+                            ? _plugin.GameStateManager.GetCurrentPlayer()
+                            : _plugin.GameStateManager.MatchAliasToPlayer(item.Groups["player"].Value));
+                        AddLootResults(results, itemId, message.IsHq ?? false, TraditionalChineseDutyMessages.Quantity(item), recipient);
+                        return true;
+                    }
+                    if((XivChatType)message.Channel == XivChatType.SystemMessage && loot.Success) {
+                        AddLootResults(results, itemId, message.IsHq ?? false, TraditionalChineseDutyMessages.Quantity(loot));
+                        return true;
+                    }
+                }
+            }
             if(results.IsComplete || (message.Channel != 2105 && message.Channel != 2233)) return false;
             if(TraditionalChineseDutyMessages.IsEnd(message.Text)) {
                 results.IsComplete = true;
@@ -738,6 +762,32 @@ namespace MapPartyAssist.Services {
                 return true;
             }
             var duty = Duties[results.DutyId];
+            if(duty.Structure == DutyStructure.Roulette) {
+                var count = results.CheckpointResults.Count;
+                if(count >= duty.Checkpoints!.Count) return false;
+                var summon = TraditionalChineseDutyMessages.Summon.Match(message.Text);
+                if(count % 2 == 0 && summon.Success) {
+                    var tier = summon.Groups["tier"].Value switch {
+                        "下級召喚" => Summon.Lesser,
+                        "中級召喚" => Summon.Greater,
+                        "上級召喚" => Summon.Elder,
+                        "特殊召喚" => Summon.Silver,
+                        _ => Summon.Gold
+                    };
+                    AddRouletteCheckpointResults(results, tier, summon.Groups["monster"].Value, summon.Groups["saved"].Success);
+                    return true;
+                }
+                if(count % 2 == 1 && (TraditionalChineseDutyMessages.IsSummonDefeated(message.Text) ||
+                    (results.LastCheckpoint!.SummonType == Summon.Silver && TraditionalChineseDutyMessages.IsSummonDeparted(message.Text)))) {
+                    AddRouletteCheckpointResults(results, null);
+                    if(results.CheckpointResults.Count == duty.Checkpoints.Count) {
+                        results.IsComplete = true;
+                        results.CompletionTime = message.Time;
+                    }
+                    return true;
+                }
+                return false;
+            }
             if(duty.Structure != DutyStructure.Doors) return false;
             return ProcessCheckpointsDoors(results, message);
         }
@@ -747,7 +797,7 @@ namespace MapPartyAssist.Services {
             if(results.CheckpointResults.Count < duty.Checkpoints!.Count) {
                 var nextCheckpoint = duty.Checkpoints![results.CheckpointResults.Count];
                 bool matches = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese
-                    ? TraditionalChineseDutyMessages.IsNextDoorCheckpoint(message.Text, results.CheckpointResults.Count)
+                    ? TraditionalChineseDutyMessages.IsNextDoorCheckpoint(message.Text, results.CheckpointResults.Count, duty.ChamberCount)
                     : nextCheckpoint.LocalizedRegex![_plugin.ClientState.ClientLanguage].IsMatch(message.Text);
                 if((message.Channel == 2233 || message.Channel == 2105) && matches) {
                     Plugin.Log.Information($"Adding new checkpoint: {nextCheckpoint.Name}");

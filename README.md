@@ -1,6 +1,6 @@
 # Map Party Assist 繁體中文預覽版
 
-Dalamud API 13，版本 2.5.1.4。已加入開門型寶物庫繁中進度及結束判定；召喚型進度與完整戰利品辨識尚未適配，新增判定待遊戲內驗證。
+Dalamud API 13，版本 2.5.1.5。依本機繁中遊戲資料補上轉盤與洞外追蹤；新增判定待遊戲內驗證。詳見 [訊息來源與限制](docs/zh-TW-message-sources.md)。
 
 [繁中說明](README.zh-TW.md) · [原始專案](https://github.com/wrath16/MapPartyAssist)
 

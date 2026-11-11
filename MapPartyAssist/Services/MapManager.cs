@@ -1,4 +1,4 @@
-﻿using Dalamud.Game;
+using Dalamud.Game;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Text;
@@ -139,6 +139,18 @@ namespace MapPartyAssist.Services {
 
         public MapManager(Plugin plugin) {
             _plugin = plugin;
+            // TC templates from LogMessage 3778, 3766/4405, 3759, 3756,
+            // 3765 and action message 533 + Action 1695.
+            var tc = ClientLanguage.TraditionalChinese;
+            EnterPortalRegex[tc] = new(@"發起了寶物庫進入申請。$");
+            ConsumedMapRegex[tc] = new(@"^「[^」]*地圖[^」]*」消失了……$");
+            MapNameRegex[tc] = new(@"(?<=^「)[^」]+(?=」消失了……$)");
+            DiscoverCofferRegex[tc] = new(@"^發現隱藏的寶箱！$");
+            OpenCofferRegex[tc] = new(@"^陷阱發動，散發出了吸引魔物的氣味！$");
+            DefeatAllRegex[tc] = new(@"^將陷阱引來的魔物全部打倒了！$");
+            PartyMemberDigRegex[tc] = new(@"發動了「挖掘」。$");
+            SelfDigRegex[tc] = new(@"^發動了「挖掘」。$");
+            DutyManager.PlayerAliasRegex[tc] = new(@"^.+?(?=發動了「挖掘」。$|發起了寶物庫進入申請。$|獲得了)");
             _plugin.ChatGui.CheckMessageHandled += OnChatMessage;
             _plugin.ClientState.TerritoryChanged += OnTerritoryChanged;
             //_plugin.AddonLifecycle.RegisterListener(AddonEvent.PreUpdate, "_ToDoList", CheckForTreasureHunt);
@@ -196,7 +208,7 @@ namespace MapPartyAssist.Services {
 
         private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled) {
             //refuse to process if not a supported language
-            if(!_plugin.IsLanguageSupported()) {
+            if(!_plugin.IsLanguageSupported() && _plugin.ClientState.ClientLanguage != ClientLanguage.TraditionalChinese) {
                 return;
             }
             string? playerKey = null;
@@ -223,7 +235,7 @@ namespace MapPartyAssist.Services {
                     var senderPayload = (PlayerPayload?)sender.Payloads.FirstOrDefault(p => p.Type == PayloadType.Player);
                     if(senderPayload is null) {
                         //from same world as player
-                        string matchName = Regex.Match(sender.TextValue, @"[A-Za-z-'\.]*\s[A-Za-z-'\.]*$").ToString();
+                        string matchName = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese ? sender.TextValue.Trim() : Regex.Match(sender.TextValue, @"[A-Za-z-'\.]*\s[A-Za-z-'\.]*$").ToString();
                         playerKey = $"{matchName} {_plugin.ClientState.LocalPlayer!.HomeWorld.Value.Name}";
                     } else {
                         playerKey = $"{senderPayload.PlayerName} {senderPayload.World.Value.Name}";
@@ -252,16 +264,54 @@ namespace MapPartyAssist.Services {
             string mapType = "";
             var lastMap = GetLastMap();
 
+            if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese && _boundByMapDutyDelayed && lastMap != null) {
+                var gil = TraditionalChineseDutyMessages.Gil.Match(message);
+                var loot = TraditionalChineseDutyMessages.LootList.Match(message);
+                var item = TraditionalChineseDutyMessages.ObtainedItem.Match(message);
+                bool changed = false;
+                if((int)type == 62 && gil.Success) {
+                    AddLootResults(lastMap, 1, false, TraditionalChineseDutyMessages.Quantity(gil), _plugin.GameStateManager.GetCurrentPlayer());
+                    changed = true;
+                } else if(itemId is uint id) {
+                    if(((int)type == 2110 || (int)type == 4158 || (int)type == 8254) && item.Success) {
+                        var recipient = playerKey ?? (item.Groups["player"].Value.Length == 0 ? _plugin.GameStateManager.GetCurrentPlayer() : _plugin.GameStateManager.MatchAliasToPlayer(item.Groups["player"].Value));
+                        AddLootResults(lastMap, id, isHQ, TraditionalChineseDutyMessages.Quantity(item), recipient);
+                        changed = true;
+                    } else if(type == XivChatType.SystemMessage && loot.Success) {
+                        AddLootResults(lastMap, id, isHQ, TraditionalChineseDutyMessages.Quantity(loot));
+                        changed = true;
+                    }
+                }
+                if(changed) {
+                    await _plugin.StorageManager.UpdateMap(lastMap);
+                    await _plugin.Refresh();
+                    return;
+                }
+            }
             //handle abbreviated names
             if(playerKey != null && playerKey.Contains('.')) {
                 playerKey = _plugin.GameStateManager.MatchAliasToPlayer(playerKey);
             }
 
+            if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese &&
+                ((int)type == 2105 || (int)type == 2233) && message == "通往寶物庫的傳送魔紋出現了！") {
+                if(lastMap != null && (messageTime - lastMap.Time).TotalMinutes < 10) {
+                    lastMap.IsPortal = true;
+                    await _plugin.StorageManager.UpdateMap(lastMap);
+                    await _plugin.Refresh();
+                }
+                return;
+            }
             if((int)type == 2361) {
                 //party member opens portal while not blocked
                 if(EnterPortalRegex[_plugin.ClientState.ClientLanguage].IsMatch(message)) {
                     Plugin.Log.Debug("Entering portal...");
-                    if(_portalBlockUntil <= messageTime) {
+                    if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese && lastMap != null && (messageTime - lastMap.Time).TotalMinutes < 10) {
+                        lastMap.IsPortal = true;
+                        await _plugin.StorageManager.UpdateMap(lastMap);
+                        await _plugin.Refresh();
+                        return;
+                    } else if(_portalBlockUntil <= messageTime) {
                         //thief's maps
                         //key = playerKey ?? "";
                         isPortal = true;
@@ -280,7 +330,7 @@ namespace MapPartyAssist.Services {
                     Plugin.Log.Debug("Map consumed...");
                     newMapFound = true;
                     mapType = MapNameRegex[_plugin.ClientState.ClientLanguage].Match(message).ToString();
-                    if(!mapType.IsNullOrEmpty()) {
+                    if(!mapType.IsNullOrEmpty() && _plugin.ClientState.ClientLanguage != ClientLanguage.TraditionalChinese) {
                         //this is bad!
                         try {
                             mapType = _plugin.TranslateDataTableEntry<EventItem>(mapType, "Singular", GrammarCase.Nominative, ClientLanguage.English);
@@ -354,6 +404,7 @@ namespace MapPartyAssist.Services {
 
                     var diggerKey = _plugin.GameStateManager.MatchAliasToPlayer(playerKey ?? _plugin.GameStateManager.GetCurrentPlayer());
                     Plugin.Log.Debug($"{diggerKey} used Dig...");
+                    if(string.IsNullOrEmpty(diggerKey)) return;
                     if(_diggers.ContainsKey(diggerKey)) {
                         _diggers[diggerKey] = messageTime;
                     } else {
@@ -361,7 +412,7 @@ namespace MapPartyAssist.Services {
                     }
                 }
             } else if(type == XivChatType.Party || type == XivChatType.Say || type == XivChatType.Alliance || type == XivChatType.Shout || type == XivChatType.Yell || type == XivChatType.TellIncoming) {
-                if(type == XivChatType.Party && mapLink != null && !_plugin.GameStateManager.CurrentPartyList.ContainsKey(playerKey)) {
+                if(type == XivChatType.Party && playerKey != null && mapLink != null && !_plugin.GameStateManager.CurrentPartyList.ContainsKey(playerKey)) {
                     //special case for cross-world party members
                     _ = _plugin.DataQueue.QueueDataOperation(async () => {
                         var crossWorldPlayer = _plugin.StorageManager.GetPlayers().Query().Where(p => p.Key == playerKey).FirstOrDefault();
@@ -385,7 +436,7 @@ namespace MapPartyAssist.Services {
                         await _plugin.Refresh();
                     });
                 }
-            } else if(_boundByMapDutyDelayed) {
+            } else if(_boundByMapDutyDelayed && _plugin.ClientState.ClientLanguage != ClientLanguage.TraditionalChinese) {
                 //gil
                 if((int)type == 62) {
                     Match m = DutyManager.GilObtainedRegex[_plugin.ClientState.ClientLanguage].Match(message);
@@ -465,7 +516,8 @@ namespace MapPartyAssist.Services {
             }
 
             if(newMapFound && _plugin.GameStateManager.CurrentPartyList.Count > 0 && !playerKey.IsNullOrEmpty()) {
-                await AddMap(_plugin.GameStateManager.CurrentPartyList[playerKey], null, mapType, false, isPortal);
+                _plugin.GameStateManager.CurrentPartyList.TryGetValue(playerKey, out var mapOwner);
+                await AddMap(mapOwner, null, mapType, false, isPortal);
                 await _plugin.Refresh();
             }
         }
@@ -474,7 +526,9 @@ namespace MapPartyAssist.Services {
             Plugin.Log.Information(string.Format("Adding new{0} map for {1}", isManual ? " manual" : "", player?.Key));
             DateTime currentTime = DateTime.UtcNow;
 
-            if(_plugin.IsLanguageSupported()) {
+            if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese) {
+                zone ??= _plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(_plugin.GameStateManager.CurrentTerritory).PlaceName.Value.Name.ToString() ?? "";
+            } else if(_plugin.IsLanguageSupported()) {
                 //have to do lookup on PlaceName sheet otherwise will not translate properly
                 var placeNameId = _plugin.DataManager.GetExcelSheet<TerritoryType>(ClientLanguage.English)?.GetRow(_plugin.GameStateManager.CurrentTerritory).PlaceName.Value.RowId;
                 zone ??= placeNameId != null ? _plugin.DataManager.GetExcelSheet<PlaceName>(ClientLanguage.English)!.GetRow((uint)placeNameId)!.Name.ToString() : "";
@@ -486,7 +540,9 @@ namespace MapPartyAssist.Services {
             TreasureMap mapType = TreasureMap.Unknown;
             uint? rowId = null;
             if(mapName != null && !isManual) {
-                rowId = _plugin.GetRowId<EventItem>(mapName, "Singular", GrammarCase.Nominative, ClientLanguage.English);
+                rowId = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese
+                    ? _plugin.DataManager.GetExcelSheet<EventItem>()?.Where(r => r.Singular.ToString() == mapName).Select(r => (uint?)r.RowId).FirstOrDefault()
+                    : _plugin.GetRowId<EventItem>(mapName, "Singular", GrammarCase.Nominative, ClientLanguage.English);
                 if(rowId != null && MapHelper.IdToMapTypeMap.ContainsKey((uint)rowId)) {
                     mapType = MapHelper.IdToMapTypeMap[(uint)rowId];
                 }
