@@ -970,8 +970,9 @@ namespace MapPartyAssist.Services {
                 };
                 if(results.LastCheckpoint is null) {
                     results.FirstLootResults.Add(lootResult);
-                } else if(results.LastCheckpoint.LootResults != null) {
-                    results.LastCheckpoint.LootResults.Add(lootResult);
+                } else {
+                    // Older serialized checkpoints can still have a null list.
+                    (results.LastCheckpoint.LootResults ??= new()).Add(lootResult);
                 }
             } else {
                 matchingLootResults.Recipient = recipient;

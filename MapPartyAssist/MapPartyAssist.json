@@ -6,7 +6,7 @@
   "InternalName": "MapPartyAssist",
   "RepoUrl": "https://github.com/wenwen-ff14/MapPartyAssist-TW",
   "ApplicableVersion": "any",
-  "Changelog": "2.5.1.6：保留通關後金幣與物品記錄；最後階段加入遊戲完成事件備援；修正 <pos> 發言者隊伍編號被當成新隊員。",
+  "Changelog": "2.5.1.7：修正完成事件建立的最後檢查點缺少戰利品清單，導致通關 Gil 只計入總額而未列入戰利品明細；兼容舊空清單。",
   "Tags": [
     "treasure maps",
     "maps",

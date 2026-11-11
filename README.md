@@ -1,6 +1,6 @@
 # Map Party Assist 繁體中文預覽版
 
-Dalamud API 13，版本 2.5.1.6。依本機繁中遊戲資料補上轉盤與洞外追蹤；新增判定待遊戲內驗證。詳見 [訊息來源與限制](docs/zh-TW-message-sources.md)。
+Dalamud API 13，版本 2.5.1.7。依本機繁中遊戲資料補上轉盤與洞外追蹤；新增判定待遊戲內驗證。詳見 [訊息來源與限制](docs/zh-TW-message-sources.md)。
 
 [繁中說明](README.zh-TW.md) · [原始專案](https://github.com/wrath16/MapPartyAssist)
 

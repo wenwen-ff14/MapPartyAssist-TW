@@ -15,7 +15,7 @@ namespace MapPartyAssist.Types {
         public string? MonsterName { get; set; }
         public bool IsSaved { get; set; }
 
-        public List<LootResult>? LootResults { get; set; }
+        public List<LootResult>? LootResults { get; set; } = new();
 
         [BsonCtor]
         public CheckpointResults() {
