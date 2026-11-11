@@ -6,7 +6,7 @@
   "InternalName": "MapPartyAssist",
   "RepoUrl": "https://github.com/wenwen-ff14/MapPartyAssist-TW",
   "ApplicableVersion": "any",
-  "Changelog": "2.5.1.5：以繁中 LogMessage 巨集分支補上轉盤召喚與清怪、洞外追蹤、傳送門及戰利品匹配；核對開門區數；區分場次結束與通關標示。",
+  "Changelog": "2.5.1.6：保留通關後金幣與物品記錄；最後階段加入遊戲完成事件備援；修正 <pos> 發言者隊伍編號被當成新隊員。",
   "Tags": [
     "treasure maps",
     "maps",

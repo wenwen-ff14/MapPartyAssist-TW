@@ -42,6 +42,14 @@ if(TraditionalChineseDutyMessages.Quantity(TraditionalChineseDutyMessages.LootLi
 if(TraditionalChineseDutyMessages.Quantity(TraditionalChineseDutyMessages.ObtainedItem.Match("測試角色獲得了「測試物品」。")) != 1) throw new Exception("Single item failed");
 if(TraditionalChineseDutyMessages.Quantity(TraditionalChineseDutyMessages.Gil.Match("獲得了10,000Gil。")) != 10000) throw new Exception("Gil failed");
 Console.WriteLine("TC summon, chamber number and loot template checks passed.");
+var party = new[] { "自身名字 巴哈姆特", "隊友 伊弗利特" };
+if(PlayerHelper.ResolveChatSender("[1]自身名字", party) != party[0]) throw new Exception("Party index treated as name");
+if(PlayerHelper.ResolveChatSender("\uE001自身名字", party) != party[0]) throw new Exception("Party icon treated as name");
+if(PlayerHelper.ResolveChatSender("[1] 不存在", party) != null) throw new Exception("Unknown sender fabricated");
+if(PlayerHelper.ResolveChatSender("同名", new[] { "同名 A", "同名 B" }) != null) throw new Exception("Ambiguous sender accepted");
+if(!TraditionalChineseDutyMessages.CanConfirmFinalClear(8, 9, false) || !TraditionalChineseDutyMessages.CanConfirmFinalClear(9, 10, false)) throw new Exception("Final stage not confirmed");
+if(TraditionalChineseDutyMessages.CanConfirmFinalClear(4, 9, false) || TraditionalChineseDutyMessages.CanConfirmFinalClear(8, 9, true)) throw new Exception("Incomplete or ended duty marked clear");
+Console.WriteLine("Chat sender identity and final clear eligibility checks passed.");
 namespace LiteDB { public class BsonIgnoreAttribute : Attribute {} public class BsonIdAttribute : Attribute {} }
 namespace MapPartyAssist.Types.Attributes { public class ValidatedDataTypeAttribute : Attribute {} }
 namespace MapPartyAssist.Types { public class MPAMap {} public class MPAMapLink {} }

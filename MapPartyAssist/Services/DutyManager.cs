@@ -531,7 +531,21 @@ namespace MapPartyAssist.Services {
 
         private void OnDutyCompleted(object? sender, ushort param1) {
             Plugin.Log.Verbose("Duty completed!");
-            //EndDuty();
+            var active = CurrentDutyResults;
+            if(_plugin.ClientState.ClientLanguage != ClientLanguage.TraditionalChinese || active == null) return;
+            _plugin.DataQueue.QueueDataOperation(async () => {
+                if(CurrentDutyResults != active) return;
+                var duty = Duties[active.DutyId];
+                // Only confirm the final clear when the final room/summon was
+                // observed. Never fill in missing rooms from a generic end event.
+                if(TraditionalChineseDutyMessages.CanConfirmFinalClear(active.CheckpointResults.Count, duty.Checkpoints!.Count, active.IsComplete)) {
+                    active.CheckpointResults.Add(new CheckpointResults(duty.Checkpoints.Last(), true));
+                    active.IsComplete = true;
+                    active.CompletionTime = DateTime.UtcNow;
+                    await _plugin.StorageManager.UpdateDutyResults(active);
+                    await _plugin.Refresh();
+                }
+            });
         }
 
         private void OnDutyWiped(object? sender, ushort param1) {
@@ -731,7 +745,9 @@ namespace MapPartyAssist.Services {
 
         //return true if updates made
         private bool ProcessTraditionalChineseProgress(DutyResults results, Message message) {
-            if(!results.IsComplete) {
+            // Completion stops progress, not the reward messages that follow it.
+            // The active result is released only when leaving the duty.
+            {
                 var gil = TraditionalChineseDutyMessages.Gil.Match(message.Text);
                 if(message.Channel == 62 && gil.Success) {
                     var quantity = TraditionalChineseDutyMessages.Quantity(gil);

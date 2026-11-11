@@ -234,6 +234,11 @@ namespace MapPartyAssist.Services {
                 case (int)XivChatType.TellIncoming:
                     var senderPayload = (PlayerPayload?)sender.Payloads.FirstOrDefault(p => p.Type == PayloadType.Player);
                     if(senderPayload is null) {
+                        if(_plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese) {
+                            playerKey = PlayerHelper.ResolveChatSender(sender.TextValue, _plugin.GameStateManager.CurrentPartyList.Keys);
+                            if(playerKey == null) return;
+                            break;
+                        }
                         //from same world as player
                         string matchName = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese ? sender.TextValue.Trim() : Regex.Match(sender.TextValue, @"[A-Za-z-'\.]*\s[A-Za-z-'\.]*$").ToString();
                         playerKey = $"{matchName} {_plugin.ClientState.LocalPlayer!.HomeWorld.Value.Name}";

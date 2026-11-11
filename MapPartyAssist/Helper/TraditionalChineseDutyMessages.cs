@@ -5,6 +5,7 @@ namespace MapPartyAssist.Helper;
 // Verified against the TC client's LogMessage rows 3777, 3800, 6998,
 // 6999, 9354, 9355 and 9365. Keep the upstream alternating checkpoints.
 internal static class TraditionalChineseDutyMessages {
+    internal static bool CanConfirmFinalClear(int reached, int total, bool ended) => !ended && total > 0 && reached == total - 1;
     internal static readonly Regex Gil = new(@"^獲得了(?<quantity>[\d,]+)Gil。");
     internal static readonly Regex ObtainedItem = new(@"^(?<player>.*?)獲得了「[^」]+」(?:×(?<quantity>[\d,]+))?。$");
     internal static readonly Regex LootList = new(@"^獲得了新的戰利品.+?(?:×(?<quantity>[\d,]+))?。(?:（限時獎勵效果生效！）)?$");
