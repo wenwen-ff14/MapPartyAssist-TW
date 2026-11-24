@@ -50,6 +50,22 @@ if(PlayerHelper.ResolveChatSender("同名", new[] { "同名 A", "同名 B" }) !=
 if(!TraditionalChineseDutyMessages.CanConfirmFinalClear(8, 9, false) || !TraditionalChineseDutyMessages.CanConfirmFinalClear(9, 10, false)) throw new Exception("Final stage not confirmed");
 if(TraditionalChineseDutyMessages.CanConfirmFinalClear(4, 9, false) || TraditionalChineseDutyMessages.CanConfirmFinalClear(8, 9, true)) throw new Exception("Incomplete or ended duty marked clear");
 Console.WriteLine("Chat sender identity and final clear eligibility checks passed.");
+// Replay all five G18 rounds, including special reward/end duplicates.
+var slotsCount = 0;
+foreach(var tier in new[] { "小小", "中等", "大大", "最終" }) {
+    if(TraditionalChineseDutyMessages.SlotsEvent(tier + "夢想！測試魔物出現了！", slotsCount, 10, false) < 0) throw new Exception("G18 summon ignored");
+    slotsCount++;
+    if(TraditionalChineseDutyMessages.SlotsEvent(tier + "夢想！測試魔物出現了！", slotsCount, 10, false) != -1) throw new Exception("G18 duplicate summon accepted");
+    if(TraditionalChineseDutyMessages.SlotsEvent("打倒了所有敵人！", slotsCount, 10, false) != 5) throw new Exception("G18 clear ignored");
+    slotsCount++;
+}
+if(TraditionalChineseDutyMessages.SlotsEvent("90秒之內撿拾100個「發光的袋子」！", slotsCount++, 10, false) != 3) throw new Exception("Special start ignored");
+if(TraditionalChineseDutyMessages.SlotsEvent("獲得了100個「發光的袋子」，出現了金寶箱！", slotsCount++, 10, true) != 5) throw new Exception("Special reward ignored");
+if(slotsCount != 10 || TraditionalChineseDutyMessages.SlotsEvent("「驚奇夢想」結束了……", slotsCount, 10, true) != -1) throw new Exception("G18 completion duplicate");
+if(!TraditionalChineseDutyMessages.IsEnd("被強制送出尋夢金庫……") || !TraditionalChineseDutyMessages.IsEnd("小隊全滅，被強制傳送出尋夢金庫……")) throw new Exception("G18 exit ignored");
+if(TraditionalChineseDutyMessages.SlotsEvent("最終夢想！打倒所有敵人！", 8, 10, false) != 4) throw new Exception("G18 no-monster branch ignored");
+Console.WriteLine("G18 five-round clear, special event, duplicate and exit checks passed.");
 namespace LiteDB { public class BsonIgnoreAttribute : Attribute {} public class BsonIdAttribute : Attribute {} }
 namespace MapPartyAssist.Types.Attributes { public class ValidatedDataTypeAttribute : Attribute {} }
 namespace MapPartyAssist.Types { public class MPAMap {} public class MPAMapLink {} }
+

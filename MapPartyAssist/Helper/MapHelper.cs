@@ -58,7 +58,7 @@ namespace MapPartyAssist.Helper {
                 TreasureMap.ConceivablySpecial => "Conceivably Special Treasure Map",
                 TreasureMap.Loboskin => "Loboskin Treasure Map",
                 TreasureMap.Braaxskin => "Br'aaxskin Treasure Map",
-                TreasureMap.Gargantuaskin => "Gargantuaskin Treasure Map",
+                TreasureMap.Gargantuaskin => "寶物地圖G18",
                 _ => "Unknown"
             };
         }

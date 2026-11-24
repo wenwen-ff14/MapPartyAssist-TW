@@ -85,6 +85,7 @@ namespace MapPartyAssist.Types {
         }
 
         public string GetDisplayName() {
+            if(DutyId == 1060) return "尋夢金庫";
             string displayName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name);
             //re-lowercase 'of'
             displayName = Regex.Replace(displayName, @"(?<!^)\bof\b", "of", RegexOptions.IgnoreCase);

@@ -2,6 +2,13 @@ using Lumina; using Lumina.Data; using Lumina.Excel.Sheets;
 System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, name) => name.Name == "Lumina" ? context.LoadFromAssemblyPath(Path.Combine(AppContext.BaseDirectory, "Lumina.dll")) : null; Run(args);
 static void Run(string[] args) {
 using var data = new GameData(args[0], new LuminaOptions { DefaultExcelLanguage = Language.TraditionalChinese });
+if(args.Length > 1 && args[1] == "--g18") {
+ foreach(var row in data.GetExcelSheet<ContentFinderCondition>().Where(r => r.RowId == 1060 || r.RowId == 993)) Console.WriteLine($"DUTY {row.RowId}: {row.Name} territory={row.TerritoryType.RowId}");
+ foreach(var row in data.GetExcelSheet<EventItem>().Where(r => r.RowId == 2003785 || r.RowId == 2003563)) Console.WriteLine($"EVENTITEM {row.RowId}: {row.Singular}");
+ foreach(var row in data.GetExcelSheet<Item>().Where(r => r.Name.ToString().Contains("G18"))) Console.WriteLine($"ITEM {row.RowId}: {row.Name}");
+ foreach(var row in data.GetExcelSheet<LogMessage>().Where(r => r.RowId >= 11260 && r.RowId <= 11275)) Console.WriteLine($"LOG {row.RowId}: {row.Text.ToMacroString()}");
+ return;
+}
 foreach(var action in data.GetExcelSheet<Lumina.Excel.Sheets.Action>().Where(a => a.Name.ToString().Contains("挖"))) Console.WriteLine($"ACTION {action.RowId}: {action.Name}");
 foreach(var row in data.GetExcelSheet<LogMessage>()) {
  var text=row.Text.ToMacroString();
@@ -9,3 +16,4 @@ foreach(var row in data.GetExcelSheet<LogMessage>()) {
 }
 
 }
+

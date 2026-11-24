@@ -454,7 +454,7 @@ namespace MapPartyAssist.Services {
                 //_currentDutyResults = new DutyResults(dutyId, Duties[dutyId].Name, _plugin.CurrentPartyList, "");
                 CurrentDutyResults = new DutyResults {
                     DutyId = dutyId,
-                    DutyName = Duties[dutyId].Name,
+                    DutyName = _plugin.ClientState.ClientLanguage == ClientLanguage.TraditionalChinese ? Duties[dutyId].GetDisplayName() : Duties[dutyId].Name,
                     Players = _plugin.GameStateManager.CurrentPartyList.Keys.ToArray(),
                     Owner = "",
                 };
@@ -778,6 +778,17 @@ namespace MapPartyAssist.Services {
                 return true;
             }
             var duty = Duties[results.DutyId];
+            if(duty.Structure == DutyStructure.Slots) {
+                var action = TraditionalChineseDutyMessages.SlotsEvent(message.Text, results.CheckpointResults.Count,
+                    duty.Checkpoints!.Count, results.LastCheckpoint?.SummonType == Summon.Silver);
+                if(action < 0) return false;
+                AddRouletteCheckpointResults(results, action == 5 ? null : (Summon)action);
+                if(results.CheckpointResults.Count == duty.Checkpoints.Count) {
+                    results.IsComplete = true;
+                    results.CompletionTime = message.Time;
+                }
+                return true;
+            }
             if(duty.Structure == DutyStructure.Roulette) {
                 var count = results.CheckpointResults.Count;
                 if(count >= duty.Checkpoints!.Count) return false;
